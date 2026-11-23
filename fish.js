@@ -12,16 +12,31 @@ function resizeCanvas() {
 resizeCanvas()
 window.addEventListener('resize', resizeCanvas)
 
+// fish images array
+let fishTypes = ['./fish_images/blue_fish.png',
+    './fish_images/nemo.png'
+]
 
-// load fish sprite sheet
-var img = new Image()
-img.src = 'fish_sheet.png'
+let fishImages = []
+let loadedCount = 0
 
-img.addEventListener('load', loadImage, false)
-// once img is loaded, call animate()
-function loadImage(e) {
-    animate()
-}
+fishTypes.forEach(path => {
+    let img = new Image()
+    img.addEventListener('load', () => {
+        loadedCount++
+        if (loadedCount === fishTypes.length) {
+            animate()
+        }
+    })
+    img.src = path
+    fishImages.push(img)
+
+});
+
+// select random fish img from array
+let randomFishPicker = () => fishImages[Math.floor(Math.random() * fishImages.length)]
+
+
 
 var shift = 0
 var frameWidth = 16
@@ -32,21 +47,20 @@ var currentFrame = 0
 // animation speed
 var frameCounter = 0 
 
-// TODO: randomize fish amount and positions 
-// TODO: add more types of fish
-// research about their speed in real life
+// TODO: randomize fish positions 
+
 var fishes = [
-    { x: 0, y: 0, speed: 8},
-    {x: 20, y: 100, speed: 4},
-    { x: 50, y: 330, speed: 5},
-    { x: 150, y: 200, speed: 1.5 },
-    {x: 190, y: 550, speed: 3.2},
-    {x: 220, y: 880, speed: 3},
-    { x: 300, y: 450, speed: 1 },
-    {x: 90, y: 650, speed: 2.5},
-    { x: 450, y: 300, speed: 2.8},
-    {x: 500, y: 400, speed: 7},
-    {x: 800, y: 730, speed: 3}
+    { x: 0, y: 0, speed: 8, img: randomFishPicker()},
+    {x: 20, y: 100, speed: 4, img: randomFishPicker()},
+    { x: 50, y: 330, speed: 5, img: randomFishPicker()},
+    { x: 150, y: 200, speed: 1.5, img: randomFishPicker() },
+    {x: 190, y: 550, speed: 3.2, img: randomFishPicker()},
+    {x: 220, y: 880, speed: 3, img: randomFishPicker()},
+    { x: 300, y: 450, speed: 1, img: randomFishPicker()},
+    {x: 90, y: 650, speed: 2.5, img: randomFishPicker()},
+    { x: 450, y: 300, speed: 2.8, img: randomFishPicker()},
+    {x: 500, y: 400, speed: 7, img: randomFishPicker()},
+    {x: 800, y: 730, speed: 3, img: randomFishPicker()}
 ]
 
 animate = () => {
@@ -56,13 +70,19 @@ animate = () => {
     // draw all fish and enlargen to 32x32 px
     fishes.forEach(fish => {
 
+    // true for the sprite that needs to be mirrored
+    let flipped = fish.img === fishImages[0]
+
     context.save();
     // move the origin of the fish to the right edge (prepare for flipping it)
-    context.translate(fish.x + 32, fish.y);
+    // (a flipped sprite is drawn to the left of the origin, so shift by its 64px width)
+    context.translate(fish.x + (flipped ? 64 : 0), fish.y);
     // flip horizontally
-    context.scale(-1, 1);
+    if (flipped) { 
+        context.scale(-1, 1)
+    }
     context.drawImage(
-        img,
+        fish.img,
         shift, 0, frameWidth, frameHeight,
         0, 0, 64, 64
     );
@@ -70,7 +90,6 @@ animate = () => {
 context.restore();
 
     })
-
 
     // advance animation every 10 frames
     frameCounter++
@@ -101,6 +120,3 @@ context.restore();
 
     requestAnimationFrame(animate)
 }
-
-
-
